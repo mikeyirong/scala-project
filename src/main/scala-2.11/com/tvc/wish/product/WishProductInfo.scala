@@ -20,15 +20,12 @@ class WishProductInfo extends Fetchable {
   @BeanProperty
   var feed_tile_text: String = _
 
-  /** 销量 */
   @BeanProperty
   var bought_num: Int = _
 
-  /** 产品打分 */
   @BeanProperty
   var rating_star: Double = _
 
-  /** 评论数 */
   @BeanProperty
   var rating_num: Int = _
 
