@@ -24,7 +24,7 @@ create table wish_product_variation (
   size_ordering             varchar(255),
   min_fulfillment_time      varchar(255),
   max_shipping_time         varchar(255),
-  price                     varchar(255),
+  price                     decimal(5,2),
   inventory                 varchar(255),
   constraint pk_wish_product_variation primary key (id))
 ;

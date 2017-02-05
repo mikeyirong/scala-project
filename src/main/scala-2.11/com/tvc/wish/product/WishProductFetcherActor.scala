@@ -88,7 +88,7 @@ class WishProductFetcherActor extends SimpleFetcher[WishProductInfo] with Actor 
               variation.max_shipping_time = x.getString("max_shipping_time")
               variation.min_fulfillment_time = x.getString("min_fulfillment_time")
               variation.original_price = x.getString("original_price")
-              variation.price = x.getString("price")
+              variation.price = x.getDoubleValue("price")
               variation.shipping_price_country_code = x.getString("shipping_price_country_code")
               variation.size_ordering = x.getString("size_ordering")
               variation.wish_product = entity

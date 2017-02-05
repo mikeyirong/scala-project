@@ -7,6 +7,7 @@ import javax.persistence.Id
 import javax.persistence.ManyToOne
 import javax.persistence.Table
 import javax.persistence.CascadeType
+import javax.persistence.Column
 
 @Entity
 @Table(name = "wish_product_variation")
@@ -46,7 +47,8 @@ class WishProductVariationInfo {
   var max_shipping_time: String = _
 
   @BeanProperty
-  var price: String = _
+  @Column(name = "price", columnDefinition = "decimal(5,2)")
+  var price: Double = _
 
   @BeanProperty
   var inventory: String = _
