@@ -69,6 +69,7 @@ class WishProductFetcherActor extends SimpleFetcher[WishProductInfo] with Actor 
         try {
           var json = JSON.parseObject(new String(bin)).getJSONObject("data").getJSONObject("contest")
           logger.info("Loading product details information")
+
           var ratingNode = json.getJSONObject("product_rating")
           entity.rating_num = ratingNode.getInteger("rating_count")
           entity.rating_star = ratingNode.getDouble("rating")
@@ -76,8 +77,19 @@ class WishProductFetcherActor extends SimpleFetcher[WishProductInfo] with Actor 
           entity.fetch_at = new SimpleDateFormat("yyyy-MM-dd").format(new Date)
           entity.name = json.getString("name")
           entity.keywords = json.getString("keywords")
+          var merchant: String = json.getJSONObject("commerce_product_info").getJSONArray("variations").getJSONObject(0).getString("merchant")
+          merchant match {
+            case null => {
+              entity.shop_name = ""
+            }
+            case _ => {
+              entity.shop_name = merchant
+            }
+
+          }
           //          entity.price = json.getString("price")
           //          entity.inventory = json.getString("inventory")
+
           try {
             entity.variations = json.getJSONObject("commerce_product_info").getJSONArray("variations").map(_.asInstanceOf[JSONObject]).map(x => {
               var variation = new WishProductVariationInfo

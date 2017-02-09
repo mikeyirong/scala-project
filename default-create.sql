@@ -4,6 +4,7 @@ create table wish_product (
   name                      varchar(255),
   small_picture             varchar(255),
   keywords                  varchar(255),
+  shop_name                 varchar(255),
   feed_tile_text            varchar(255),
   bought_num                integer,
   rating_star               double,
