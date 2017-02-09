@@ -87,6 +87,19 @@ class WishProductFetcherActor extends SimpleFetcher[WishProductInfo] with Actor 
             }
 
           }
+
+          var merchant_url: String = json.getJSONObject("commerce_product_info").getJSONArray("variations").getJSONObject(0).getString("merchant_name")
+
+          merchant_url match {
+            case null => {
+              entity.shop_url_name = ""
+            }
+            case _ => {
+              entity.shop_url_name = merchant_url
+            }
+
+          }
+
           //          entity.price = json.getString("price")
           //          entity.inventory = json.getString("inventory")
 

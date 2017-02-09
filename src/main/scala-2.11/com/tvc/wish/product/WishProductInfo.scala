@@ -28,9 +28,12 @@ class WishProductInfo extends Fetchable {
 
   @BeanProperty
   var keywords: String = _
-  
+
   @BeanProperty
   var shop_name: String = _
+
+  @BeanProperty
+  var shop_url_name: String = _
 
   @BeanProperty
   var feed_tile_text: String = _
