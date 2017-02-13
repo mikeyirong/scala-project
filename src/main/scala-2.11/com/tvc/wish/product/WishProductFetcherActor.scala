@@ -33,6 +33,9 @@ class WishProductFetcherActor extends SimpleFetcher[WishProductInfo] with Actor 
     }
     case fetch_response(url, headers, body, bin) => try {
       var json = JSON.parseObject(new String(bin)).getJSONObject("data")
+
+      logger.info("json is {}", json)
+
       var next_offset = json.getInteger("next_offset")
       logger.info("Current offset is {}", next_offset)
       json.getJSONArray("products").map(_.asInstanceOf[JSONObject]).map(js => {
@@ -126,11 +129,11 @@ class WishProductFetcherActor extends SimpleFetcher[WishProductInfo] with Actor 
 
           ebean.find(classOf[WishProductInfo]).where.eq("fetch_at", new SimpleDateFormat("yyyy-MM-dd").format(new Date)).eq("product_id", entity.product_id).findUnique match {
             case null => {
-              logger.info("SAVING...")
+              logger.info("SAVING...{}", entity.product_id)
               ebean.save(entity)
             }
             case _ => {
-              logger.info("Updating...")
+              logger.info("Updating...{}", entity.product_id)
               ebean.update(entity)
             }
           }
