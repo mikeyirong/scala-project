@@ -33,6 +33,9 @@ class WishProductFetcherActor(classic: Any, jsonNode: String) extends SimpleFetc
     case fetch_response(url, headers, body, bin) => try {
       var json = JSON.parseObject(new String(bin)).getJSONObject("data")
       logger.info("Response is" + url + " {}", json)
+
+      logger.info("json is {}", json)
+
       var next_offset = json.getInteger("next_offset")
       logger.info("Current offset is {}", next_offset)
 
@@ -68,6 +71,8 @@ class WishProductFetcherActor(classic: Any, jsonNode: String) extends SimpleFetc
       this.fetch_post("https://www.wish.com/api/product/get")(mkHeaders)(bin => {
         try {
           var json = JSON.parseObject(new String(bin)).getJSONObject("data").getJSONObject("contest")
+          logger.info("Loading product details information")
+
           var ratingNode = json.getJSONObject("product_rating")
           entity.rating_num = ratingNode.getInteger("rating_count")
           entity.rating_star = ratingNode.getDouble("rating")
@@ -75,8 +80,31 @@ class WishProductFetcherActor(classic: Any, jsonNode: String) extends SimpleFetc
           entity.fetch_at = new SimpleDateFormat("yyyy-MM-dd").format(new Date)
           entity.name = json.getString("name")
           entity.keywords = json.getString("keywords")
+          var merchant: String = json.getJSONObject("commerce_product_info").getJSONArray("variations").getJSONObject(0).getString("merchant")
+          merchant match {
+            case null => {
+              entity.shop_name = ""
+            }
+            case _ => {
+              entity.shop_name = merchant
+            }
+          }
+
+          var merchant_url: String = json.getJSONObject("commerce_product_info").getJSONArray("variations").getJSONObject(0).getString("merchant_name")
+
+          merchant_url match {
+            case null => {
+              entity.shop_url_name = ""
+            }
+            case _ => {
+              entity.shop_url_name = merchant_url
+            }
+
+          }
+
           //          entity.price = json.getString("price")
           //          entity.inventory = json.getString("inventory")
+
           try {
             entity.variations = json.getJSONObject("commerce_product_info").getJSONArray("variations").map(_.asInstanceOf[JSONObject]).map(x => {
               var variation = new WishProductVariationInfo
@@ -100,12 +128,14 @@ class WishProductFetcherActor(classic: Any, jsonNode: String) extends SimpleFetc
 
           ebean.find(classOf[WishProductInfo]).where.eq("fetch_at", new SimpleDateFormat("yyyy-MM-dd").format(new Date)).eq("product_id", entity.product_id).findUnique match {
             case null => {
-              logger.info("SAVING...")
+              logger.info("SAVING...{}", entity.product_id)
               ebean.save(entity)
             }
             case _ => {
               logger.info("Updating...")
               // ebean.update(entity)
+              logger.info("Updating...{}", entity.product_id)
+              ebean.update(entity)
             }
           }
         } catch {

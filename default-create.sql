@@ -5,6 +5,8 @@ create table wish_product (
   query                     varchar(255),
   small_picture             varchar(255),
   keywords                  longtext,
+  shop_name                 varchar(255),
+  shop_url_name             varchar(255),
   feed_tile_text            varchar(255),
   bought_num                integer,
   rating_star               double,
