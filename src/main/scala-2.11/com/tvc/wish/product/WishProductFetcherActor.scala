@@ -34,7 +34,7 @@ class WishProductFetcherActor extends SimpleFetcher[WishProductInfo] with Actor 
     case fetch_response(url, headers, body, bin) => try {
       var json = JSON.parseObject(new String(bin)).getJSONObject("data")
 
-      logger.info("json is {}", json)
+      logger.info("json  is {}", json)
 
       var next_offset = json.getInteger("next_offset")
       logger.info("Current offset is {}", next_offset)
