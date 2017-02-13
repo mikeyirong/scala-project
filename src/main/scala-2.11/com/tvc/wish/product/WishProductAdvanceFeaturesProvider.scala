@@ -24,6 +24,10 @@ trait WishProductAdvanceFeaturesProvider extends LoggingSupport {
     }
   }
 
+  private def mkCookie(xsrf: String) = System.getProperties.getProperty("http.cookie") match {
+    case cookie: String => new Header("Cookie", cookie + ";_xsrf=" + xsrf)
+    case _ => throw new IllegalArgumentException("http.cookie must be configured")
+  }
   /**
    * Make http headers
    */
@@ -32,10 +36,7 @@ trait WishProductAdvanceFeaturesProvider extends LoggingSupport {
     Array[Header](
       /* */
       new Header("X-XSRFToken", xsrf),
-      /* */
-      // new Header("Cookie", "IR_PI=1483523447467-vn30vyys6yo1z; _xsrf=" + xsrf + "; sweeper_session=\"MTNiMjEwYTEtODA3ZC00ZTZmLWE0NzMtZjk5NmZjOWFiMGExMjAxNy0wMi0wNCAwMTo0NjowOC40MjQyNzg=|1486172768|ca295780038086462e1e0c4908585eabed413178\"; __utmt=1; __utma=96128154.495241984.1483523445.1486258675.1486261019.9; __utmb=96128154.1.10.1486261019; __utmc=96128154; __utmz=96128154.1484812743.4.3.utmcsr=wish.malllib.com|utmccn=(referral)|utmcmd=referral|utmcct=/wish/t/index; bsid=b90edef69a5b4a94b09076f4c6e06393; IR_EV=1486261022528%7C4953%7C0%7C1486261022528; sweeper_uuid=c2fcffe1f7814613ae620aa9901f67da")
-
-      new Header("Cookie", "IR_PI=1483930936018-rlgwqx7do91lp; _xsrf=" + xsrf + "; sweeper_session=\"MzZlMzNhNzYtMjkxNC00NGFiLWE0MDItMDI5OTRkOTY0NzFiMjAxNy0wMi0xMyAwMjo0MDowMy41NjI4MjI=|1486953603|78214128ae10b899778beab5b33f4554f2359083\"; __utmt=1; IR_EV=1486956870863%7C4953%7C0%7C1486953571538; __utma=96128154.1416423993.1483930936.1486689708.1486953565.53; __utmb=96128154.7.10.1486953565; __utmc=96128154; __utmz=96128154.1486260072.41.3.utmcsr=baidu|utmccn=(organic)|utmcmd=organic; bsid=0e9e601ba6644697a4f77bc537372a65; sweeper_uuid=04f0f38035a8436a99f4ba2e5402d610"),
+      mkCookie(xsrf),
       /* */
       new Header("Origin", "https://www.wish.com"),
 

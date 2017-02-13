@@ -1,11 +1,10 @@
 package com.tvc.wish.product
 
-import java.util.Date
-
 import scala.beans.BeanProperty
 
 import javax.persistence.Entity
 import javax.persistence.Id
+import javax.persistence.Lob
 import javax.persistence.OneToMany
 import javax.persistence.Table
 import tcrawler.Fetchable
@@ -21,12 +20,16 @@ class WishProductInfo extends Fetchable {
   var product_id: String = _
 
   @BeanProperty
+  @Lob
   var name: String = _
 
+  @BeanProperty
+  var query: String = _
   @BeanProperty
   var small_picture: String = _
 
   @BeanProperty
+  @Lob
   var keywords: String = _
 
   @BeanProperty
