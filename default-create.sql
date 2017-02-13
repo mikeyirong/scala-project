@@ -1,9 +1,10 @@
 create table wish_product (
   id                        integer auto_increment not null,
   product_id                varchar(255),
-  name                      varchar(255),
+  name                      longtext,
+  query                     varchar(255),
   small_picture             varchar(255),
-  keywords                  varchar(255),
+  keywords                  longtext,
   feed_tile_text            varchar(255),
   bought_num                integer,
   rating_star               double,

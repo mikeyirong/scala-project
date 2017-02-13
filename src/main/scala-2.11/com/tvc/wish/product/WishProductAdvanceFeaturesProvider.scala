@@ -19,11 +19,15 @@ trait WishProductAdvanceFeaturesProvider extends LoggingSupport {
     xsrf
   } catch {
     case e: Throwable => {
-      logger.error("Loading xsrf code faild, fetcher will retry",e)
+      logger.error("Loading xsrf code faild, fetcher will retry", e)
       getXsrfCode
     }
   }
 
+  private def mkCookie(xsrf: String) = System.getProperties.getProperty("http.cookie") match {
+    case cookie: String => new Header("Cookie", cookie + ";_xsrf=" + xsrf)
+    case _ => throw new IllegalArgumentException("http.cookie must be configured")
+  }
   /**
    * Make http headers
    */
@@ -33,8 +37,8 @@ trait WishProductAdvanceFeaturesProvider extends LoggingSupport {
       /* */
       new Header("X-XSRFToken", xsrf),
       /* */
-      new Header("Cookie", "IR_PI=1483523447467-vn30vyys6yo1z; _xsrf=" + xsrf + "; sweeper_session=\"MTNiMjEwYTEtODA3ZC00ZTZmLWE0NzMtZjk5NmZjOWFiMGExMjAxNy0wMi0wNCAwMTo0NjowOC40MjQyNzg=|1486172768|ca295780038086462e1e0c4908585eabed413178\"; __utmt=1; __utma=96128154.495241984.1483523445.1486258675.1486261019.9; __utmb=96128154.1.10.1486261019; __utmc=96128154; __utmz=96128154.1484812743.4.3.utmcsr=wish.malllib.com|utmccn=(referral)|utmcmd=referral|utmcct=/wish/t/index; bsid=b90edef69a5b4a94b09076f4c6e06393; IR_EV=1486261022528%7C4953%7C0%7C1486261022528; sweeper_uuid=c2fcffe1f7814613ae620aa9901f67da"),
-
+      //new Header("Cookie", "483523447467-vn30vyys6yo1z; _xsrf=" + xsrf + "; sweeper_session=\"YjhjZjcxNjEtYmFkYy00ODAzLThkNjctNzVkMmJiNDlmNDMwMjAxNy0wMi0xMyAwMzozMDowOC41NDM5OTk=|1486956608|2f8576daaf62b7b3a890406197531318a473487f\"; __utmt=1; __utma=96128154.495241984.1483523445.1486691714.1486956560.20; __utmb=96128154.6.10.1486956560; __utmc=96128154; __utmz=96128154.1486621915.18.4.utmcsr=wiki.mindcenter.cn|utmccn=(referral)|utmcmd=referral|utmcct=/index.php/WISH%E4%BA%A7%E5%93%81%E8%B0%83%E7%A0%94%E6%8A%A5%E5%91%8A; bsid=8e6573d35d764e2d83a0d48ccc4c9e89; IR_EV=1486958348070%7C4953%7C0%7C1486956669650; sweeper_uuid=7b4b60827b5e45739dbb8c65952dcdf2"),
+      mkCookie(xsrf),
       /* */
       new Header("Origin", "https://www.wish.com"),
 

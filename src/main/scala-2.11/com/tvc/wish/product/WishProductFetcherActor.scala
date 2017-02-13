@@ -19,10 +19,9 @@ import tcrawler.SimpleFetcher
 case class fetch_task(url: String, headers: Array[Header], body: Array[NameValuePair])
 case class fetch_response(url: String, headers: Array[Header], body: Array[NameValuePair], bin: Array[Byte])
 case class merge_entity(entity: WishProductInfo)
-class WishProductFetcherActor extends SimpleFetcher[WishProductInfo] with Actor with LoggingSupport with WishProductAdvanceFeaturesProvider {
-  val URL = "https://www.wish.com/api/feed/get-filtered-feed"
-  var ebean = PersistenceFactory.load("classpath:dbconfig.properties").getEbeanServer
 
+class WishProductFetcherActor(classic: Any, jsonNode: String) extends SimpleFetcher[WishProductInfo] with Actor with LoggingSupport with WishProductAdvanceFeaturesProvider {
+  var ebean = PersistenceFactory.load("classpath:dbconfig.properties").getEbeanServer
   def receive = {
     case fetch_task(url, headers, body) => {
       this.fetch_post(url)(headers)(bin => {
@@ -33,34 +32,35 @@ class WishProductFetcherActor extends SimpleFetcher[WishProductInfo] with Actor 
     }
     case fetch_response(url, headers, body, bin) => try {
       var json = JSON.parseObject(new String(bin)).getJSONObject("data")
+      logger.info("Response is" + url + " {}", json)
       var next_offset = json.getInteger("next_offset")
       logger.info("Current offset is {}", next_offset)
-      json.getJSONArray("products").map(_.asInstanceOf[JSONObject]).map(js => {
+
+      var querys = body.filter(_.getName.equals("query"))
+      var query = if (querys.size == 0) "" else querys(0).getValue
+
+      var entities = json.getJSONArray(jsonNode).map(_.asInstanceOf[JSONObject]).map(js => {
         val entity = new WishProductInfo()
         entity.small_picture = js.getString("small_picture")
         entity.feed_tile_text = js.getString("feed_tile_text")
         entity.product_id = js.getString("id")
+        entity.query = query
         entity
-      }).toList.foreach(x => ActorsPool.retrieveActor ! merge_entity(x))
+      }).toList
 
-      if (next_offset != null)
-        /* next page */
-        ActorsPool.retrieveActor ! fetch_task(URL, mkHeaders, Array[NameValuePair]( /* */
-          new NameValuePair("count", "25"),
-          /* */
-          new NameValuePair("offset", next_offset + ""),
-          /* */
-          new NameValuePair("request_id", "tabbed_feed_latest"),
-          /* */
-          new NameValuePair("request_categories", "false"),
+      entities.foreach(x => ActorsPool.retrieveActor ! merge_entity(x))
 
-          /* */
-          new NameValuePair("_buckets", ""),
-
-          /* */
-          new NameValuePair("_experiments", "")))
+      if (next_offset != null) {
+        ActorsPool.retrieveActor ! fetch_task(url, mkHeaders, HttpBodyFactory.createHttpBody(classic match {
+          case "customize_list" => List(classic, query, next_offset, entities)
+          case _ => classic
+        }, next_offset))
+      }
     } catch {
-      case _: Throwable => ActorsPool.retrieveActor ! fetch_task(url, headers, body)
+      case e: Throwable => {
+        logger.info("Error occurred", e)
+        ActorsPool.retrieveActor ! fetch_task(url, headers, body)
+      }
     } finally {
       ActorsPool.context.stop(self)
     }
@@ -68,7 +68,6 @@ class WishProductFetcherActor extends SimpleFetcher[WishProductInfo] with Actor 
       this.fetch_post("https://www.wish.com/api/product/get")(mkHeaders)(bin => {
         try {
           var json = JSON.parseObject(new String(bin)).getJSONObject("data").getJSONObject("contest")
-          logger.info("Loading product details information")
           var ratingNode = json.getJSONObject("product_rating")
           entity.rating_num = ratingNode.getInteger("rating_count")
           entity.rating_star = ratingNode.getDouble("rating")
@@ -106,32 +105,22 @@ class WishProductFetcherActor extends SimpleFetcher[WishProductInfo] with Actor 
             }
             case _ => {
               logger.info("Updating...")
-              ebean.update(entity)
+              // ebean.update(entity)
             }
           }
         } catch {
-          case _: Throwable => ActorsPool.retrieveActor ! merge_entity(entity)
+          case e: Throwable => {
+            logger.error("Error occurred", e)
+            ActorsPool.retrieveActor ! merge_entity(entity)
+          }
         } finally {
           ActorsPool.context.stop(self)
         }
         List[WishProductInfo]()
-      })(x => false)(x => List[WishProductInfo]())(Array[NameValuePair](
-        /* cid */
-        new NameValuePair("cid", entity.product_id),
-        /* related_contest_count */
-        new NameValuePair("related_contest_count", "9"),
-
-        /* include_related_creator */
-        new NameValuePair("include_related_creator", "false"),
-
-        /* request_sizing_chart_info */
-        new NameValuePair("request_sizing_chart_info", "true"),
-
-        /* _buckets */
-        new NameValuePair("_buckets", ""),
-
-        /* _experiments */
-        new NameValuePair("_experiments", "")))
+      })(x => false)(x => List[WishProductInfo]())(HttpBodyFactory.createHttpBody("latest_detail", entity))
     }
   }
 }
+
+class LatestWishProductFetcherActor extends WishProductFetcherActor("latest_list", "products")
+class CustomWishProductFetcherActor extends WishProductFetcherActor("customize_list", "results")
