@@ -133,9 +133,6 @@ class WishProductFetcherActor(classic: Any, jsonNode: String) extends SimpleFetc
             }
             case _ => {
               logger.info("Updating...")
-              // ebean.update(entity)
-              logger.info("Updating...{}", entity.product_id)
-              ebean.update(entity)
             }
           }
         } catch {
