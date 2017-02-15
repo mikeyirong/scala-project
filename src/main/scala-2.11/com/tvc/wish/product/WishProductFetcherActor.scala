@@ -3,7 +3,8 @@ package com.tvc.wish.product
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions.seqAsJavaList
 
 import org.apache.commons.httpclient.Header
 import org.apache.commons.httpclient.NameValuePair
@@ -13,6 +14,9 @@ import com.alibaba.fastjson.JSONObject
 import com.tvc.be.db.PersistenceFactory
 
 import akka.actor.Actor
+import akka.actor.actorRef2Scala
+import javax.persistence.Entity
+import javax.persistence.Table
 import tcrawler.LoggingSupport
 import tcrawler.SimpleFetcher
 
@@ -80,6 +84,7 @@ class WishProductFetcherActor(classic: Any, jsonNode: String) extends SimpleFetc
           entity.fetch_at = new SimpleDateFormat("yyyy-MM-dd").format(new Date)
           entity.name = json.getString("name")
           entity.keywords = json.getString("keywords")
+          entity.generation_time = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").parse(json.getString("generation_time"))
           var merchant: String = json.getJSONObject("commerce_product_info").getJSONArray("variations").getJSONObject(0).getString("merchant")
           merchant match {
             case null => {

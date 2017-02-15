@@ -9,6 +9,7 @@ import javax.persistence.OneToMany
 import javax.persistence.Table
 import tcrawler.Fetchable
 import javax.persistence.CascadeType
+import java.util.Date
 
 @Entity
 @Table(name = "wish_product")
@@ -22,6 +23,9 @@ class WishProductInfo extends Fetchable {
   @BeanProperty
   @Lob
   var name: String = _
+
+  @BeanProperty
+  var generation_time: Date = _
 
   @BeanProperty
   var query: String = _
