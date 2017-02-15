@@ -102,8 +102,6 @@ class WishProductFetcherActor(classic: Any, jsonNode: String) extends SimpleFetc
 
           }
 
-          //          entity.price = json.getString("price")
-          //          entity.inventory = json.getString("inventory")
 
           try {
             entity.variations = json.getJSONObject("commerce_product_info").getJSONArray("variations").map(_.asInstanceOf[JSONObject]).map(x => {
