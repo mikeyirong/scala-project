@@ -17,6 +17,7 @@ object CustomQueryWishProductFetcher extends App with LoggingSupport with WishPr
   var query = "query".<::("phone accessories")
   var initialize: () => Unit = () => try {
     var bin = InternetIO.fromUrl("https://www.wish.com/search/" + URLEncoder.encode(query))
+    logger.info("this is  bin------------------->")
     var doc = ContentFormatter.apply(bin.getBytes)("text/html").format().asInstanceOf[Document]
     $(doc).select("script").filter(_.text.contains("pageParams['distinct_buckets']")).foreach(x => {
       var engine = new ScriptEngineManager().getEngineByExtension("js")
@@ -48,6 +49,5 @@ object CustomQueryWishProductFetcher extends App with LoggingSupport with WishPr
       initialize()
     }
   }
-
   initialize()
 }
